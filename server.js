@@ -144,7 +144,7 @@ app.post('/api/expenses', async (req, res) => {
 
 // Serve frontend routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
 // Error handling middleware
