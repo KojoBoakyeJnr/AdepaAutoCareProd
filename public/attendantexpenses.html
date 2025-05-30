@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Record Expense - Adepa Auto Care</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="attendant-theme">
+  <div class="dashboard-container attendant-container">
+    <header class="dashboard-header">
+      <div class="branding">
+        <img src="images/logo.jpeg"  alt="Washing Bay Logo" class="logo">
+      </div>
+      <button id="themeToggle" class="theme-toggle">
+        <span class="dark-icon">🌙</span>
+        <span class="light-icon">☀️</span>
+      </button>
+      <button class="btn logout-btn" onclick="logout()">Logout</button>
+    </header>
+
+    <div class="entry-form-container">
+      <form id="expenseForm" class="modern-form">
+        <div class="form-grid">
+
+          <div class="form-section">
+            <h3 class="section-title">Expense Details</h3>
+
+            <div class="input-group">
+              <label>Date</label>
+              <input type="date" id="expenseDate" readonly>
+            </div>
+
+            <div class="input-group">
+              <label>Expense Category</label>
+              <select id="expenseCategory" required>
+                <option value="">Select Category</option>
+                <option value="Fuel">Fuel</option>
+                <option value="Supplies">Supplies</option>
+                <option value="Repairs">Repairs</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Waste">Waste</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label>Description</label>
+              <input type="text" id="expenseDescription" required>
+            </div>
+
+            <div class="input-group">
+              <label>Amount (GHS)</label>
+              <input type="number" id="expenseAmount" required>
+            </div>
+
+            <div class="input-group">
+              <label>Responsible Person</label>
+              <input type="text" id="responsiblePerson" required>
+            </div>
+
+            <div class="input-group">
+              <label>Payment Method</label>
+              <select id="paymentMethod" required>
+                <option value="">Select Method</option>
+                <option value="Cash">Cash</option>
+                <option value="Mobile Money">Mobile Money</option>
+                <option value="Card">Card</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="reset" class="btn clear-btn">Clear</button>
+          <button type="submit" class="btn submit-btn">Submit Expense</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="loading-overlay" id="loading">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div id="confirmationModal" class="modal-overlay">
+      <div class="modal-content">
+        <h3>Confirm Submission</h3>
+        <p>Are you sure you want to save this expense?</p>
+        <div class="modal-buttons">
+          <button class="modal-button cancel-btn" id="cancelSubmit">Cancel</button>
+          <button class="modal-button confirm-btn" id="confirmSubmit">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const userRole = localStorage.getItem('userRole');
+    
+    if (!userRole) {
+        window.location.href = 'login.html';
+        return;
+    }},)
+
+
+    // Autofill date with today's date
+    document.getElementById('expenseDate').valueAsDate = new Date();
+
+    const form = document.getElementById('expenseForm');
+    const confirmationModal = document.getElementById('confirmationModal');
+    const cancelSubmit = document.getElementById('cancelSubmit');
+    const confirmSubmit = document.getElementById('confirmSubmit');
+    const loading = document.getElementById('loading');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      confirmationModal.style.display = 'flex';
+    });
+
+    cancelSubmit.addEventListener('click', () => {
+      confirmationModal.style.display = 'none';
+    });
+
+    confirmSubmit.addEventListener('click', async () => {
+      confirmationModal.style.display = 'none';
+      loading.style.display = 'flex';
+
+      const data = {
+        date: document.getElementById('expenseDate').value,
+        category: document.getElementById('expenseCategory').value,
+        description: document.getElementById('expenseDescription').value,
+        amount: document.getElementById('expenseAmount').value,
+        person: document.getElementById('responsiblePerson').value,
+        payment: document.getElementById('paymentMethod').value
+      };
+
+      try {
+        const response = await fetch('/api/expenses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          alert('Expense recorded successfully!');
+          form.reset();
+          document.getElementById('expenseDate').valueAsDate = new Date();
+        } else {
+          alert('Error saving expense. Please try again.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Server error. Please try again later.');
+      } finally {
+        loading.style.display = 'none';
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem('userRole');
+      window.location.href = 'login.html';
+    }
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const storedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', storedTheme);
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  </script>
+</body>
+</html>

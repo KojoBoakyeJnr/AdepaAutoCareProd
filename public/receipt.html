@@ -1,0 +1,234 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Receipt - Adepa Auto Care</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap');
+        
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .receipt {
+            width: 300px;
+            background: white;
+            padding: 25px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        
+        .tagline {
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .receipt-meta {
+            font-size: 13px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px dashed #aaa;
+            margin: 15px 0;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            text-align: left;
+        }
+        
+        .detail-value {
+            text-align: right;
+        }
+        
+        .total-section {
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        .footer-message {
+            font-size: 13px;
+            margin: 20px 0;
+            line-height: 1.4;
+            color: #555;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 3px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .print-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .print-btn:hover {
+            background-color: #218838;
+        }
+        
+        .action-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .action-btn:hover {
+            background-color: #0069d9;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .receipt {
+                box-shadow: none;
+                border: none;
+            }
+            
+            .buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt">
+        <div class="company-name">ADEPA AUTO CARE</div>
+        <div class="tagline">Professional Auto Care Services</div>
+        <div class="receipt-meta">
+            <div id="receiptDate">28/05/2025</div>
+            <div id="receiptId">Receipt #AC038270</div>
+        </div>
+        
+        <hr>
+        
+        <div class="detail-row">
+            <span class="detail-label">Customer:</span>
+            <span class="detail-value" id="customerName">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Mobile:</span>
+            <span class="detail-value" id="mobileNumber">-</span>
+        </div>
+        
+        <hr>
+        
+        <div class="detail-row">
+            <span class="detail-label">Car Number:</span>
+            <span class="detail-value" id="carNumber">-</span>
+        </div>
+        
+        <hr>
+        
+        <div class="detail-row">
+            <span class="detail-label">Service:</span>
+            <span class="detail-value" id="serviceType1">-</span>
+        </div>
+        <div class="detail-row" id="secondaryServiceRow" style="display: none;">
+            <span class="detail-label">Additional:</span>
+            <span class="detail-value" id="serviceType2">-</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Payment:</span>
+            <span class="detail-value" id="paymentType">-</span>
+        </div>
+        
+        <hr>
+        
+        <div class="total-section">
+            <div>TOTAL PAID:</div>
+            <div class="total-amount" id="totalAmount">GHS 0.00</div>
+        </div>
+        
+        <div class="footer-message">
+            Thank you for choosing us!<br>
+            We look forward to serving you again <br>
+            Contact: 0244665012 <br> adepaautocare@gmail.com
+        </div>
+        
+        <div class="buttons">
+            <button class="btn print-btn" onclick="window.print()">Print</button>
+            <button class="btn action-btn" onclick="window.location.href='attendant.html'">New</button>
+        </div>
+    </div>
+
+    <script>
+        // Load data from URL parameters
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const now = new Date();
+            
+            // Set receipt metadata
+            document.getElementById('receiptDate').textContent = now.toLocaleDateString('en-GB');
+            document.getElementById('receiptId').textContent = `Receipt #AC${Math.floor(10000 + Math.random() * 90000)}`;
+            
+            // Populate customer details
+            document.getElementById('customerName').textContent = urlParams.get('customerName') || '-';
+            document.getElementById('mobileNumber').textContent = urlParams.get('mobileNumber') || '-';
+            
+            // Populate vehicle details
+            document.getElementById('carNumber').textContent = urlParams.get('carNumber') || '-';
+            
+            // Populate service details
+            document.getElementById('serviceType1').textContent = urlParams.get('serviceType1') || '-';
+            
+            const serviceType2 = urlParams.get('serviceType2');
+            if (serviceType2 && serviceType2.trim()) {
+                document.getElementById('serviceType2').textContent = serviceType2;
+                document.getElementById('secondaryServiceRow').style.display = 'flex';
+            }
+            
+            // Populate payment details
+            document.getElementById('paymentType').textContent = (urlParams.get('paymentType') || 'CASH').toUpperCase();
+            document.getElementById('totalAmount').textContent = `GHS ${parseFloat(urlParams.get('amount') || 0).toFixed(2)}`;
+        });
+    </script>
+</body>
+</html>

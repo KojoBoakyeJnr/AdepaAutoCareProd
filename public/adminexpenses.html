@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Expenses - Adepa Auto Care</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</head>
+<body class="admin-theme">
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <div class="branding">
+        <img src="images/logo.jpeg"  alt="Logo" class="logo" />
+      </div>
+      <div class="header-actions">
+        <button class="btn export-btn" onclick="exportExcel()">Export Excel</button>
+        <button class="btn logout-btn" onclick="logout()">Logout</button>
+      </div>
+      <button id="themeToggle" class="theme-toggle">
+        <span class="dark-icon">🌙</span>
+        <span class="light-icon">☀️</span>
+      </button>
+    </header>
+
+    <div class="controls-section">
+      <div class="date-filter">
+        <div class="input-group">
+          <label>From Date</label>
+          <input type="date" id="startDate" class="date-input" />
+        </div>
+        <div class="input-group">
+          <label>To Date</label>
+          <input type="date" id="endDate" class="date-input" />
+        </div>
+        <button class="btn filter-btn" onclick="filterByDate()">Apply Filter</button>
+        <button class="btn clear-btn" onclick="clearFilter()">Clear</button>
+      </div>
+
+      <div class="search-container">
+        <div class="input-group search-group">
+          <label>Search All Fields</label>
+          <input type="text" id="globalSearch" placeholder="Search..." />
+          <button class="clear-search-btn" onclick="clearSearch()" title="Clear search">✖</button>
+        </div>
+        <button class="btn search-btn" onclick="performGlobalSearch()">Search</button>
+      </div>
+    </div>
+
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="card-content">
+          <span class="card-label">Total Expenses</span>
+          <span class="card-value" id="totalExpense">₵0.00</span>
+        </div>
+        <div class="card-icon">💸</div>
+      </div>
+    </div>
+
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount (₵)</th>
+            <th>Responsible Person</th>
+            <th>Payment Method</th>
+          </tr>
+        </thead>
+        <tbody id="dataBody"></tbody>
+      </table>
+
+      <div class="pagination-controls">
+        <button class="btn" onclick="previousPage()" id="prevPage">Previous</button>
+        <span id="pageInfo" class="page-info">Page 1 of 1</span>
+        <button class="btn" onclick="nextPage()" id="nextPage">Next</button>
+      </div>
+
+      <div class="loading-overlay" id="loading">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const userRole = localStorage.getItem('userRole');
+    
+    if (!userRole) {
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    if (userRole !== 'admin') {
+        alert('Access denied. Admin privileges required.');
+        window.location.href = 'login.html';
+        return;
+    }},)
+    // Auth check
+    document.addEventListener('DOMContentLoaded', () => {
+      const role = localStorage.getItem('userRole');
+      if (role !== 'admin') {
+        alert('Access denied');
+        window.location.href = 'login.html';
+      } else {
+        loadData();
+      }
+    });
+
+    let allData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    const itemsPerPage = 15;
+
+    async function loadData() {
+      showLoading();
+      try {
+        const response = await fetch('/api/expenses');
+        allData = await response.json();
+        allData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        filteredData = [...allData];
+        displayData();
+        updatePagination();
+        updateSummary();
+      } catch (err) {
+        console.error(err);
+        alert('Failed to load data');
+      } finally {
+        hideLoading();
+      }
+    }
+
+    function displayData() {
+      const tbody = document.getElementById('dataBody');
+      tbody.innerHTML = '';
+
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const pageItems = filteredData.slice(start, end);
+
+      if (pageItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="no-data">No expenses found</td></tr>`;
+        return;
+      }
+
+      for (const item of pageItems) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${new Date(item.date).toLocaleDateString()}</td>
+          <td>${item.category}</td>
+          <td>${item.description}</td>
+          <td>₵${Number(item.amount).toFixed(2)}</td>
+          <td>${item.person}</td>
+          <td>${item.payment}</td>
+        `;
+        tbody.appendChild(row);
+      }
+    }
+
+    function updateSummary() {
+      const total = filteredData.reduce((sum, item) => sum + Number(item.amount), 0);
+      document.getElementById('totalExpense').textContent = `₵${total.toFixed(2)}`;
+    }
+
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+      document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+      document.getElementById('prevPage').disabled = currentPage === 1;
+      document.getElementById('nextPage').disabled = currentPage === totalPages;
+    }
+
+    function previousPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        displayData();
+        updatePagination();
+      }
+    }
+
+    function nextPage() {
+      const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        displayData();
+        updatePagination();
+      }
+    }
+
+    function filterByDate() {
+      const start = new Date(document.getElementById('startDate').value);
+      const end = new Date(document.getElementById('endDate').value);
+      end.setHours(23, 59, 59, 999);
+      filteredData = allData.filter(item => {
+        const date = new Date(item.date);
+        return date >= start && date <= end;
+      });
+      currentPage = 1;
+      displayData();
+      updateSummary();
+      updatePagination();
+    }
+
+    function clearFilter() {
+      document.getElementById('startDate').value = '';
+      document.getElementById('endDate').value = '';
+      filteredData = [...allData];
+      currentPage = 1;
+      displayData();
+      updateSummary();
+      updatePagination();
+    }
+
+    function performGlobalSearch() {
+      const term = document.getElementById('globalSearch').value.trim().toLowerCase();
+      if (!term) {
+        clearFilter();
+        return;
+      }
+
+      filteredData = allData.filter(item =>
+        Object.values(item).some(value =>
+          value && value.toString().toLowerCase().includes(term)
+        )
+      );
+
+      currentPage = 1;
+      displayData();
+      updateSummary();
+      updatePagination();
+    }
+
+    function clearSearch() {
+      document.getElementById('globalSearch').value = '';
+      performGlobalSearch();
+    }
+
+    function exportExcel() {
+      if (filteredData.length === 0) return alert('No data to export');
+
+      const exportData = filteredData.map(item => ({
+        'Date': new Date(item.date).toLocaleDateString(),
+        'Category': item.category,
+        'Description': item.description,
+        'Amount (₵)': Number(item.amount).toFixed(2),
+        'Person': item.person,
+        'Payment Method': item.payment
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Expenses');
+      XLSX.writeFile(wb, 'expenses_report.xlsx');
+    }
+
+    function showLoading() {
+      document.getElementById('loading').style.display = 'flex';
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    function logout() {
+      localStorage.removeItem('userRole');
+      window.location.href = 'login.html';
+    }
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const storedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', storedTheme);
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+
+    document.getElementById('globalSearch').addEventListener('keyup', function (e) {
+      if (e.key === 'Enter') {
+        performGlobalSearch();
+      }
+    });
+  </script>
+</body>
+</html>
