@@ -214,15 +214,16 @@ document.getElementById('endDate').valueAsDate = today;
       updatePagination();
     }
 
-    function clearFilter() {
-      document.getElementById('startDate').valueAsDate = today;
-      document.getElementById('endDate').valueAsDate = today;
-      filteredData = [...allData];
-      currentPage = 1;
-      displayData();
-      updateSummary();
-      updatePagination();
-    }
+  function clearFilter() {
+    const today = new Date();
+    document.getElementById('startDate').valueAsDate = today;
+    document.getElementById('endDate').valueAsDate = today;
+    filteredData = [...allData];
+    currentPage = 1;
+    displayData();
+    updateSummary();
+    updatePagination();
+}
 
     function performGlobalSearch() {
       const term = document.getElementById('globalSearch').value.trim().toLowerCase();

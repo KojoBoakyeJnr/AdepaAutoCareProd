@@ -374,15 +374,15 @@ document.getElementById('endDate').valueAsDate = today;
         }
 
         function clearFilter() {
-            document.getElementById('startDate').valueAsDate = today;
-            document.getElementById('endDate').valueAsDate = today;
-            filteredData = [...allData];
-            currentPage = 1;
-            displayData();
-            updateSummary();
-            updatePagination();
-        }
-
+    const today = new Date();
+    document.getElementById('startDate').valueAsDate = today;
+    document.getElementById('endDate').valueAsDate = today;
+    filteredData = [...allData];
+    currentPage = 1;
+    displayData();
+    updateSummary();
+    updatePagination();
+}
         function exportExcel() {
             if (filteredData.length === 0) {
                 showErrorMessage('No data to export');

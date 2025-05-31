@@ -452,12 +452,12 @@ document.getElementById('endDate').valueAsDate = today;
             });
         }
 
-        function clearFilters() {
-            document.getElementById('startDate').valueAsDate = today;
-            document.getElementById('startDate').valueAsDate = today;
-            loadFinancialData();
-        }
-
+      function clearFilters() {
+    const today = new Date();
+    document.getElementById('startDate').valueAsDate = today;
+    document.getElementById('endDate').valueAsDate = today;
+    loadFinancialData();
+}
 
         function prepareExportData() {
             const data = [];
