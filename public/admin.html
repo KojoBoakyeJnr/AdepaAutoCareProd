@@ -12,7 +12,7 @@
     <div class="dashboard-container">
         <header class="dashboard-header">
             <div class="branding">
-                <img src="images/logo.jpeg"  alt="Washing Bay Logo" class="logo">
+                <img src="images/logo.jpeg" alt="Washing Bay Logo" class="logo">
             </div>
             <div class="header-actions">
                 <button class="btn export-btn" onclick="exportExcel()">
@@ -80,38 +80,34 @@
                     <div class="card-icon">🏢</div>
                 </div>
                 <div class="summary-card">
-    <div class="card-content">
-        <span class="card-label">Total Expenses</span>
-        <span class="card-value" id="dateRangeExpenses">₵0.00</span>
-    </div>
-    <div class="card-icon">📉</div>
-</div>
-<div class="summary-card">
-    <div class="card-content">
-        <span class="card-label">Net Revenue</span>
-        <span class="card-value" id="netRevenue">₵0.00</span>
-    </div>
-    <div class="card-icon">📊</div>
-</div>
-            
+                    <div class="card-content">
+                        <span class="card-label">Total Expenses</span>
+                        <span class="card-value" id="dateRangeExpenses">₵0.00</span>
+                    </div>
+                    <div class="card-icon">📉</div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-content">
+                        <span class="card-label">Net Revenue</span>
+                        <span class="card-value" id="netRevenue">₵0.00</span>
+                    </div>
+                    <div class="card-icon">📊</div>
+                </div>
             </div>
 
-
-        <div class="search-container">
-    <div class="input-group search-group">
-        <label>Search All Fields</label>
-        <input type="text" id="globalSearch" placeholder="Search by any field...">
-        <button class="clear-search-btn" onclick="clearSearch()" title="Clear search">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-            </svg>
-        </button>
-    </div>
-    <button class="btn search-btn" onclick="performGlobalSearch()">Search</button>
-</div>
-
-
+            <div class="search-container">
+                <div class="input-group search-group">
+                    <label>Search All Fields</label>
+                    <input type="text" id="globalSearch" placeholder="Search by any field..." onkeyup="if(event.key === 'Enter') performGlobalSearch()">
+                    <button class="clear-search-btn" onclick="clearSearch()" title="Clear search">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                        </svg>
+                    </button>
+                </div>
+                <button class="btn search-btn" onclick="performGlobalSearch()">Search</button>
+            </div>
         </div>
 
         <div class="data-table-container">
@@ -150,103 +146,54 @@
     </div>
 
     <script>
-        // Check authentication before proceeding
-        document.addEventListener('DOMContentLoaded', function() {
-    const userRole = localStorage.getItem('userRole');
-    
-    if (!userRole) {
-        window.location.href = 'login.html';
-        return;
-    }
-    
-    if (userRole !== 'admin') {
-        alert('Access denied. Admin privileges required.');
-        window.location.href = 'login.html';
-        return;
-    }
-},)
-        document.addEventListener('DOMContentLoaded', function() {
-
-
-            const userRole = localStorage.getItem('userRole');
-            
-            // If not logged in or not an admin, redirect to login page
-            if (!userRole) {
-                window.location.href = 'login.html';
-                return;
-            } else if (userRole !== 'admin') {
-                alert('Access denied. Admin privileges required.');
-                window.location.href = 'login.html';
-                return;
-            }
-            // Set default dates (current day)
-const today = new Date();
-document.getElementById('startDate').valueAsDate = today;
-document.getElementById('endDate').valueAsDate = today;
-
-
-            // If authentication passes, load the data
-             loadData().then(() => {
-        filterByDate(); // This will apply the filter after data loads
-    });
-        });
-        
-        // Logout function
-        function logout() {
-            localStorage.removeItem('userRole');
-            localStorage.removeItem('username');
-            window.location.href = 'login.html';
-        }
-        
-        async function fetchExpenses(startDate, endDate) {
-    try {
-        const response = await fetch('/api/expenses');
-        if (!response.ok) throw new Error('Failed to fetch expenses');
-        
-        const allExpenses = await response.json();
-        
-        if (!startDate || !endDate) {
-            // If no date range provided, return all expenses
-            return allExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
-        }
-        
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        
-        return allExpenses
-            .filter(exp => {
-                const expDate = new Date(exp.date);
-                return expDate >= start && expDate <= end;
-            })
-            .reduce((sum, exp) => sum + Number(exp.amount), 0);
-    } catch (error) {
-        console.error('Error fetching expenses:', error);
-        return 0;
-    }
-}
-        // Data management variables
+        // Global variables
         let allData = [];
         let filteredData = [];
         let currentPage = 1;
         const itemsPerPage = 15;
 
+        // Authentication check
+        document.addEventListener('DOMContentLoaded', function() {
+            const userRole = localStorage.getItem('userRole');
+            
+            if (!userRole || userRole !== 'admin') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Set default dates to today
+            const today = new Date();
+            document.getElementById('startDate').valueAsDate = today;
+            document.getElementById('endDate').valueAsDate = today;
+            
+            // Load data
+            loadData().then(() => {
+                filterByDate(); // Apply default filter
+            });
+        });
+
         async function loadData() {
             showLoading();
             try {
-                const response = await fetch('/api/data');
-                if (!response.ok) throw new Error('Network response was not ok');
+                const [salesResponse, expensesResponse] = await Promise.all([
+                    fetch('/api/data'),
+                    fetch('/api/expenses')
+                ]);
                 
-                allData = await response.json();
-                allData.sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp)); // Sort by Timestamp descending
+                if (!salesResponse.ok || !expensesResponse.ok) {
+                    throw new Error('Failed to load data');
+                }
                 
+                allData = await salesResponse.json();
+                allData.sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp));
                 filteredData = [...allData];
-                updatePagination();
+                
                 displayData();
                 updateSummary();
+                updatePagination();
             } catch (error) {
-                console.error('Error:', error);
-                showErrorMessage('Failed to load data. Please try again.');
+                console.error('Error loading data:', error);
+                alert('Failed to load data');
             } finally {
                 hideLoading();
             }
@@ -255,20 +202,16 @@ document.getElementById('endDate').valueAsDate = today;
         function displayData() {
             const tbody = document.getElementById('dataBody');
             tbody.innerHTML = '';
-            
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const pageData = filteredData.slice(startIndex, endIndex);
+
+            const startIdx = (currentPage - 1) * itemsPerPage;
+            const endIdx = startIdx + itemsPerPage;
+            const pageData = filteredData.slice(startIdx, endIdx);
 
             if (pageData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="14" class="no-data">No data available</td>
-                    </tr>
-                `;
+                tbody.innerHTML = '<tr><td colspan="14" class="no-data">No data available</td></tr>';
                 return;
             }
-            
+
             pageData.forEach(item => {
                 const date = new Date(item.Timestamp).toLocaleDateString('en-GH', {
                     day: 'numeric',
@@ -289,47 +232,136 @@ document.getElementById('endDate').valueAsDate = today;
                     <td>${item['Secondary Service'] || '-'}</td>
                     <td>${item['Washer Name'] || '-'}</td>
                     <td>${item['Payment Type'] || '-'}</td>
-                    <td>₵${Number(item['Total Amount (GHS)']).toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td>₵${Number(item['Washer Commission (GHS)']).toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td>₵${Number(item['Company Commission (GHS)']).toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td>₵${Number(item['Total Amount (GHS)']).toFixed(2)}</td>
+                    <td>₵${Number(item['Washer Commission (GHS)']).toFixed(2)}</td>
+                    <td>₵${Number(item['Company Commission (GHS)']).toFixed(2)}</td>
                 `;
                 tbody.appendChild(row);
             });
         }
 
         async function updateSummary() {
-    const totalAmount = filteredData.reduce((sum, item) => sum + (item['Total Amount (GHS)'] || 0), 0);
-    const totalWasher = filteredData.reduce((sum, item) => sum + (item['Washer Commission (GHS)'] || 0), 0);
-    const totalCompany = filteredData.reduce((sum, item) => sum + (item['Company Commission (GHS)'] || 0), 0);
-    
-    // Count unique car numbers
-    const carNumbers = filteredData
-        .map(item => item['Car Number']?.trim())
-        .filter(number => number && number !== '-');
-    const uniqueCarCount = new Set(carNumbers).size;
-
-    // Get date range for expense calculation
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    
-    // Calculate expenses for the date range (or all if no range selected)
-    const expensesTotal = await fetchExpenses(startDate, endDate);
-    const netRevenue = totalCompany - expensesTotal;
-
-    document.getElementById('totalCars').textContent = uniqueCarCount;
-    document.getElementById('totalAmount').textContent = `₵${totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('totalWasher').textContent = `₵${totalWasher.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('totalCompany').textContent = `₵${totalCompany.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('dateRangeExpenses').textContent = `₵${expensesTotal.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    document.getElementById('netRevenue').textContent = `₵${netRevenue.toLocaleString('en-GH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-        function updatePagination() {
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+            // Calculate totals from filtered data
+            const totalAmount = filteredData.reduce((sum, item) => sum + (Number(item['Total Amount (GHS)']) || 0), 0);
+            const totalWasher = filteredData.reduce((sum, item) => sum + (Number(item['Washer Commission (GHS)']) || 0), 0);
+            const totalCompany = filteredData.reduce((sum, item) => sum + (Number(item['Company Commission (GHS)']) || 0), 0);
             
-            document.getElementById('prevPage').disabled = currentPage === 1;
-            document.getElementById('nextPage').disabled = currentPage === totalPages;
+            // Count unique car numbers in filtered data
+            const carNumbers = filteredData
+                .map(item => item['Car Number']?.trim())
+                .filter(number => number && number !== '-');
+            const uniqueCarCount = new Set(carNumbers).size;
+
+            // Get expenses for current date range
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const expensesTotal = await fetchExpenses(startDate, endDate);
+            const netRevenue = totalCompany - expensesTotal;
+
+            // Update UI
+            document.getElementById('totalCars').textContent = uniqueCarCount;
+            document.getElementById('totalAmount').textContent = `₵${totalAmount.toFixed(2)}`;
+            document.getElementById('totalWasher').textContent = `₵${totalWasher.toFixed(2)}`;
+            document.getElementById('totalCompany').textContent = `₵${totalCompany.toFixed(2)}`;
+            document.getElementById('dateRangeExpenses').textContent = `₵${expensesTotal.toFixed(2)}`;
+            document.getElementById('netRevenue').textContent = `₵${netRevenue.toFixed(2)}`;
+        }
+
+        async function fetchExpenses(startDate, endDate) {
+            try {
+                const response = await fetch('/api/expenses');
+                if (!response.ok) throw new Error('Failed to fetch expenses');
+                
+                const allExpenses = await response.json();
+                
+                if (!startDate || !endDate) {
+                    return allExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+                }
+                
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                
+                return allExpenses
+                    .filter(exp => {
+                        const expDate = new Date(exp.date);
+                        return expDate >= start && expDate <= end;
+                    })
+                    .reduce((sum, exp) => sum + Number(exp.amount), 0);
+            } catch (error) {
+                console.error('Error fetching expenses:', error);
+                return 0;
+            }
+        }
+
+        function filterByDate() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Please select both start and end dates');
+                return;
+            }
+
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            end.setHours(23, 59, 59, 999);
+
+            filteredData = allData.filter(item => {
+                const itemDate = new Date(item.Timestamp);
+                return itemDate >= start && itemDate <= end;
+            });
+
+            currentPage = 1;
+            displayData();
+            updateSummary();
+            updatePagination();
+        }
+
+        function clearFilter() {
+            const today = new Date();
+            document.getElementById('startDate').valueAsDate = today;
+            document.getElementById('endDate').valueAsDate = today;
+            
+            // Apply filter for today's data
+            const start = new Date(today);
+            const end = new Date(today);
+            end.setHours(23, 59, 59, 999);
+            
+            filteredData = allData.filter(item => {
+                const itemDate = new Date(item.Timestamp);
+                return itemDate >= start && itemDate <= end;
+            });
+            
+            currentPage = 1;
+            displayData();
+            updateSummary();
+            updatePagination();
+        }
+
+        function performGlobalSearch() {
+            const term = document.getElementById('globalSearch').value.trim().toLowerCase();
+            
+            if (!term) {
+                clearFilter();
+                return;
+            }
+
+            filteredData = allData.filter(item => {
+                return Object.values(item).some(value => 
+                    value && value.toString().toLowerCase().includes(term)
+                );
+            });
+
+            currentPage = 1;
+            displayData();
+            updateSummary();
+            updatePagination();
+        }
+
+        function clearSearch() {
+            document.getElementById('globalSearch').value = '';
+            performGlobalSearch();
         }
 
         function previousPage() {
@@ -349,56 +381,19 @@ document.getElementById('endDate').valueAsDate = today;
             }
         }
 
-        function filterByDate() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            
-            if (!startDate || !endDate) {
-                showErrorMessage('Please select both start and end dates');
-                return;
-            }
-            
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            end.setHours(23, 59, 59, 999);
-            
-            filteredData = allData.filter(item => {
-                const itemDate = new Date(item.Timestamp);
-                return itemDate >= start && itemDate <= end;
-            });
-            
-            currentPage = 1;
-            displayData();
-            updateSummary();
-            updatePagination();
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prevPage').disabled = currentPage === 1;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
         }
 
-      function clearFilter() {
-    const today = new Date();
-    document.getElementById('startDate').valueAsDate = today;
-    document.getElementById('endDate').valueAsDate = today;
-    
-    // Reset the filtered data to show only today's data
-    const start = new Date(today);
-    const end = new Date(today);
-    end.setHours(23, 59, 59, 999);
-    
-    filteredData = allData.filter(item => {
-        const itemDate = new Date(item.Timestamp);
-        return itemDate >= start && itemDate <= end;
-    });
-    
-    currentPage = 1;
-    displayData();
-    updateSummary();
-    updatePagination();
-}
         function exportExcel() {
             if (filteredData.length === 0) {
-                showErrorMessage('No data to export');
+                alert('No data to export');
                 return;
             }
-            
+
             const exportData = filteredData.map(item => ({
                 'Date': new Date(item.Timestamp).toLocaleDateString(),
                 'Customer Name': item['Customer Name'] || '',
@@ -411,17 +406,15 @@ document.getElementById('endDate').valueAsDate = today;
                 'Secondary Service': item['Secondary Service'] || '',
                 'Washer Name': item['Washer Name'] || '',
                 'Payment Type': item['Payment Type'] || '',
-                'Amount (₵)': Number(item['Total Amount (GHS)']).toLocaleString('en-GH'),
-                'Washer Commission (₵)': Number(item['Washer Commission (GHS)']).toLocaleString('en-GH'),
-                'Company Commission (₵)': Number(item['Company Commission (GHS)']).toLocaleString('en-GH')
+                'Amount (₵)': Number(item['Total Amount (GHS)']).toFixed(2),
+                'Washer Commission (₵)': Number(item['Washer Commission (GHS)']).toFixed(2),
+                'Company Commission (₵)': Number(item['Company Commission (GHS)']).toFixed(2)
             }));
 
             const ws = XLSX.utils.json_to_sheet(exportData);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Auto Care Data');
-            
-            const filename = `auto_care_report_${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(wb, filename);
+            XLSX.writeFile(wb, `auto_care_report_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
         function showLoading() {
@@ -432,81 +425,22 @@ document.getElementById('endDate').valueAsDate = today;
             document.getElementById('loading').style.display = 'none';
         }
 
-        function showErrorMessage(message) {
-            const msg = document.createElement('div');
-            msg.className = 'error-message';
-            msg.textContent = message;
-            document.body.appendChild(msg);
-            setTimeout(() => msg.remove(), 3000);
+        function logout() {
+            localStorage.removeItem('userRole');
+            window.location.href = 'login.html';
         }
 
-        // Theme Toggle
+        // Theme toggle
         const themeToggle = document.getElementById('themeToggle');
         const storedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', storedTheme);
-
+        
         themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         });
-
-        // Add this function to your script
-// Replace previous search functions with these
-function performGlobalSearch() {
-    const searchTerm = document.getElementById('globalSearch').value.trim().toLowerCase();
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    
-    // If search is empty, show all data
-    if (!searchTerm) {
-        clearFilter();
-        return;
-    }
-    
-    // Filter by date range if dates are selected
-    let dateFilteredData = [...allData];
-    if (startDate && endDate) {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-        
-        dateFilteredData = allData.filter(item => {
-            const itemDate = new Date(item.Timestamp);
-            return itemDate >= start && itemDate <= end;
-        });
-    }
-    
-    // Filter by search term across all columns
-    filteredData = dateFilteredData.filter(item => {
-        return Object.values(item).some(value => {
-            if (value === null || value === undefined) return false;
-            return value.toString().toLowerCase().includes(searchTerm);
-        });
-    });
-    
-    currentPage = 1;
-    displayData();
-    updateSummary();
-    updatePagination();
-    
-    if (filteredData.length === 0) {
-        showErrorMessage('No matching records found');
-    }
-}
-
-function clearSearch() {
-    document.getElementById('globalSearch').value = '';
-    performGlobalSearch(); // This will trigger showing all data
-}
-
-// Add event listener for Enter key
-document.getElementById('globalSearch').addEventListener('keyup', function(e) {
-    if (e.key === 'Enter') {
-        performGlobalSearch();
-    }
-});
     </script>
 </body>
 </html>
