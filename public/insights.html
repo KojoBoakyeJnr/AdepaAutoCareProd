@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
     <div class="dashboard-container">
         <header class="dashboard-header">
             <div class="branding">
-                <img src="images/logo.jpeg"  alt="Adepa Auto Care Logo" class="logo">
+                <img src="images/logo.jpeg" alt="Adepa Auto Care Logo" class="logo">
                 <h1>Financial Insights</h1>
             </div>
             <div class="header-actions">
@@ -112,32 +112,30 @@
     <script>
         // Check authentication
         document.addEventListener('DOMContentLoaded', function() {
-        const userRole = localStorage.getItem('userRole');
-        
-        // If not logged in or not admin, redirect
-        if (!userRole) {
-            window.location.href = 'login.html';
-            return;
-        }
-        
-        if (userRole !== 'admin') {
-            alert('Access denied. Admin privileges required.');
-            window.location.href = 'login.html';
-            return;
-        }
-
-        // Set default dates (last 7 days)
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(endDate.getDate() - 7);
-        
-        document.getElementById('startDate').valueAsDate = startDate;
-        document.getElementById('endDate').valueAsDate = endDate;
-        
-        loadFinancialData();
+            const userRole = localStorage.getItem('userRole');
             
-         });
-        
+            // If not logged in or not admin, redirect
+            if (!userRole) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            if (userRole !== 'admin') {
+                alert('Access denied. Admin privileges required.');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Set default dates (last 7 days)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(endDate.getDate() - 7);
+            
+            document.getElementById('startDate').valueAsDate = startDate;
+            document.getElementById('endDate').valueAsDate = endDate;
+            
+            loadFinancialData();
+        });
 
         // Chart instances
         let revenueExpensesChart;
@@ -746,6 +744,7 @@
             height: 400px;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .large-card {
@@ -761,9 +760,9 @@
         }
 
         .chart-card canvas {
-            flex: 1;
             width: 100% !important;
-            height: 100% !important;
+            height: calc(100% - 40px) !important;
+            min-height: 0;
         }
         
         .loading-overlay {
