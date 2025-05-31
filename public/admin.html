@@ -374,8 +374,8 @@ document.getElementById('endDate').valueAsDate = today;
         }
 
         function clearFilter() {
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
+            document.getElementById('startDate').valueAsDate = today;
+            document.getElementById('endDate').valueAsDate = today;
             filteredData = [...allData];
             currentPage = 1;
             displayData();
