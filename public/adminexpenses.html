@@ -95,21 +95,34 @@
     // Authentication check
     document.addEventListener('DOMContentLoaded', function() {
       const userRole = localStorage.getItem('userRole');
-      
-      if (!userRole || userRole !== 'admin') {
+    
+    if (!userRole || userRole !== 'admin') {
         window.location.href = 'login.html';
         return;
-      }
+    }
 
-      // Set default dates to today
-      const today = new Date();
-      document.getElementById('startDate').valueAsDate = today;
-      document.getElementById('endDate').valueAsDate = today;
-      
-      // Load data
-      loadData().then(() => {
-        filterByDate(); // Apply default filter
-      });
+    // Set default dates to today
+    const today = new Date();
+    document.getElementById('startDate').valueAsDate = today;
+    document.getElementById('endDate').valueAsDate = today;
+    
+    // Load data and apply today's filter by default
+    loadData().then(() => {
+        // Apply filter for today's data immediately after load
+        const start = new Date(today);
+        const end = new Date(today);
+        end.setHours(23, 59, 59, 999);
+        
+        filteredData = allData.filter(item => {
+            const itemDate = new Date(item.date);
+            return itemDate >= start && itemDate <= end;
+        });
+        
+        currentPage = 1;
+        displayData();
+        updateSummary();
+        updatePagination();
+    });
     });
 
     async function loadData() {
