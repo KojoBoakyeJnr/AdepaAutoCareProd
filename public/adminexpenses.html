@@ -100,13 +100,21 @@
         window.location.href = 'login.html';
         return;
     }},)
+
+    
     // Auth check
     document.addEventListener('DOMContentLoaded', () => {
+
       const role = localStorage.getItem('userRole');
+      
       if (role !== 'admin') {
         alert('Access denied');
         window.location.href = 'login.html';
       } else {
+        // Set default dates (current day)
+const today = new Date();
+document.getElementById('startDate').valueAsDate = today;
+document.getElementById('endDate').valueAsDate = today;
         loadData();
       }
     });

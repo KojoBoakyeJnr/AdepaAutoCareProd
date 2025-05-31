@@ -166,6 +166,8 @@
     }
 },)
         document.addEventListener('DOMContentLoaded', function() {
+
+
             const userRole = localStorage.getItem('userRole');
             
             // If not logged in or not an admin, redirect to login page
@@ -177,7 +179,10 @@
                 window.location.href = 'login.html';
                 return;
             }
-            
+            // Set default dates (current day)
+const today = new Date();
+document.getElementById('startDate').valueAsDate = today;
+document.getElementById('endDate').valueAsDate = today;
             // If authentication passes, load the data
             loadData();
         });
@@ -188,6 +193,7 @@
             localStorage.removeItem('username');
             window.location.href = 'login.html';
         }
+        
         async function fetchExpenses(startDate, endDate) {
     try {
         const response = await fetch('/api/expenses');
