@@ -155,35 +155,20 @@
         // Authentication check
         document.addEventListener('DOMContentLoaded', function() {
             const userRole = localStorage.getItem('userRole');
-    
-    if (!userRole || userRole !== 'admin') {
-        window.location.href = 'login.html';
-        return;
-    }
+            
+            if (!userRole || userRole !== 'admin') {
+                window.location.href = 'login.html';
+                return;
+            }
 
-    // Set default dates to today
-    const today = new Date();
-    document.getElementById('startDate').valueAsDate = today;
-    document.getElementById('endDate').valueAsDate = today;
-    
-    // Load data and apply today's filter by default
-    loadData().then(() => {
-        // Apply filter for today's data immediately after load
-        const start = new Date(today);
-        const end = new Date(today);
-        end.setHours(23, 59, 59, 999);
-        
-        filteredData = allData.filter(item => {
-            const itemDate = new Date(item.Timestamp);
-            return itemDate >= start && itemDate <= end;
+            // Set default dates to today
+            const today = new Date();
+            document.getElementById('startDate').valueAsDate = today;
+            document.getElementById('endDate').valueAsDate = today;
+            
+            // Load data
+            loadData();
         });
-        
-        currentPage = 1;
-        displayData();
-        updateSummary();
-        updatePagination();
-    });
-});
 
         async function loadData() {
             showLoading();
@@ -199,17 +184,33 @@
                 
                 allData = await salesResponse.json();
                 allData.sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp));
-                filteredData = [...allData];
                 
-                displayData();
-                updateSummary();
-                updatePagination();
+                // Filter to today's data immediately after loading
+                filterToday();
             } catch (error) {
                 console.error('Error loading data:', error);
-                alert('Failed to load data');
+                alert('Failed to load data. Please try again.');
             } finally {
                 hideLoading();
             }
+        }
+
+        function filterToday() {
+            const today = new Date();
+            const start = new Date(today);
+            const end = new Date(today);
+            start.setHours(0, 0, 0, 0);
+            end.setHours(23, 59, 59, 999);
+            
+            filteredData = allData.filter(item => {
+                const itemDate = new Date(item.Timestamp);
+                return itemDate >= start && itemDate <= end;
+            });
+            
+            currentPage = 1;
+            displayData();
+            updateSummary();
+            updatePagination();
         }
 
         function displayData() {
@@ -312,12 +313,13 @@
             const endDate = document.getElementById('endDate').value;
             
             if (!startDate || !endDate) {
-                alert('Please select both start and end dates');
+                filterToday();
                 return;
             }
 
             const start = new Date(startDate);
             const end = new Date(endDate);
+            start.setHours(0, 0, 0, 0);
             end.setHours(23, 59, 59, 999);
 
             filteredData = allData.filter(item => {
@@ -331,27 +333,12 @@
             updatePagination();
         }
 
-        
-           function clearFilter() {
-    const today = new Date();
-    document.getElementById('startDate').valueAsDate = today;
-    document.getElementById('endDate').valueAsDate = today;
-    
-    // Apply filter for today's data
-    const start = new Date(today);
-    const end = new Date(today);
-    end.setHours(23, 59, 59, 999);
-    
-    filteredData = allData.filter(item => {
-        const itemDate = new Date(item.Timestamp);
-        return itemDate >= start && itemDate <= end;
-    });
-    
-    currentPage = 1;
-    displayData();
-    updateSummary();
-    updatePagination();
-}
+        function clearFilter() {
+            const today = new Date();
+            document.getElementById('startDate').valueAsDate = today;
+            document.getElementById('endDate').valueAsDate = today;
+            filterToday();
+        }
 
         function performGlobalSearch() {
             const term = document.getElementById('globalSearch').value.trim().toLowerCase();
