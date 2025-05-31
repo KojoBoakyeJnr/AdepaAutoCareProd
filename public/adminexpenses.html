@@ -218,6 +218,7 @@ document.getElementById('endDate').valueAsDate = today;
     const today = new Date();
     document.getElementById('startDate').valueAsDate = today;
     document.getElementById('endDate').valueAsDate = today;
+    filterByDate();
     filteredData = [...allData];
     currentPage = 1;
     displayData();
