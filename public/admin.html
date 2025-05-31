@@ -183,8 +183,12 @@
 const today = new Date();
 document.getElementById('startDate').valueAsDate = today;
 document.getElementById('endDate').valueAsDate = today;
+
+
             // If authentication passes, load the data
-            loadData();
+             loadData().then(() => {
+        filterByDate(); // This will apply the filter after data loads
+    });
         });
         
         // Logout function
