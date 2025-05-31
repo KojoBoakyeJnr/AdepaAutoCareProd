@@ -373,12 +373,21 @@ document.getElementById('endDate').valueAsDate = today;
             updatePagination();
         }
 
-        function clearFilter() {
+      function clearFilter() {
     const today = new Date();
     document.getElementById('startDate').valueAsDate = today;
     document.getElementById('endDate').valueAsDate = today;
-    filterByDate();
-    filteredData = [...allData];
+    
+    // Reset the filtered data to show only today's data
+    const start = new Date(today);
+    const end = new Date(today);
+    end.setHours(23, 59, 59, 999);
+    
+    filteredData = allData.filter(item => {
+        const itemDate = new Date(item.Timestamp);
+        return itemDate >= start && itemDate <= end;
+    });
+    
     currentPage = 1;
     displayData();
     updateSummary();
