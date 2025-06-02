@@ -532,6 +532,7 @@
             } finally {
                 loading.style.display = 'none';
             }
+
         });
 
         function showSuccessMessage() {
@@ -618,6 +619,14 @@
             // Close modal after 2 seconds
             setTimeout(closePasswordModal, 2000);
         });
+
+  document.getElementById('mobileNumber').addEventListener('input', function(e) {
+        // Remove all non-digit characters (including spaces)
+        let value = e.target.value.replace(/\D/g, '');
+        // Update the input value
+        e.target.value = value;
+    });
+
     </script>
 </body>
 </html>
